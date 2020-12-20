@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Synthèse vocale</title>
+    <link href="/css/fabHome.css" rel="stylesheet"/>
+</head>
+<body>
+    <h1>Bienvenue dans notre exemple de projet de synthèse et reconaissance vocale</h1>
+    <fieldset>
+        <legend>Tableau des ordres</legend>
+        <textarea id="text"></textarea>
+    </fieldset>
+    <div>
+        <button id="start">Démarrer</button>
+        <button id="stop">Terminer</button>
+    </div>
+    <div>
+        <h1 th:text="${response}"></h1>
+    </div>
+    <script>
+        let btnStart = document.getElementById("start");
+        let btnStop = document.getElementById("stop");
+        let textSpace = document.getElementById("text");
+        let baseUrl = "http://localhost:8080/saveCommande/";
+
+        //Reconnaissance vocale
+        var recognition = new (window.webkitSpeechRecognition)();
+
+         recognition.lang = 'fr-FR';
+         recognition.continuous = true;
+
+         recognition.onresult = function(event) {
+             textSpace.value = event.results[0][0].transcript;
+             baseUrl = baseUrl+textSpace.value;
+             console.log(baseUrl);
+         }
+
+         btnStart.onclick = function (){
+             baseUrl = "http://localhost:8080/saveCommande/";
+             recognition.start();
+         }
+
+         btnStop.onclick = function (){
+             recognition.stop();
+                    var xmlhttp = new XMLHttpRequest();
+                    xmlhttp.open("POST",baseUrl);
+                    xmlhttp.send();
+
+                    xmlhttp.onreadystatechange = function() {
+                        if (xmlhttp.readyState == 4) {
+                            if (xmlhttp.status == 201) {
+                                console.log("votre demande a été prise en compte");
+                            }
+                        }
+                    }
+                    textSpace.value = null;
+         }
+    </script>
+</body>
+</html>
